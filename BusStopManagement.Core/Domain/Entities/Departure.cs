@@ -1,11 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace BusStopManagement.Core.Domain.Entities
+﻿namespace BusStopManagement.Core.Domain.Entities
 {
     public class Departure
     {
-        [Key]
         public Guid DepartureID { get; set; }
         
         public string Destination { get; set; } = string.Empty;
@@ -16,7 +12,6 @@ namespace BusStopManagement.Core.Domain.Entities
 
         public Guid BusStopID { get; set; }
 
-        [ForeignKey("BusStopID")]
         public BusStop BusStop { get; set; } = null!;
     }
 }
