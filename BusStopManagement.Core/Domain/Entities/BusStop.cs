@@ -4,6 +4,10 @@
     {
         public Guid BusStopID { get; set; }
 
-        public ICollection<Departure>? Departures { get; set; } = [];
+        public string BusStopName { get; set; } = string.Empty;
+
+        public string BusStopAddress { get; set; } = string.Empty;
+
+        public ICollection<Departure> Departures { get; set; } = new List<Departure>();
     }
 }
