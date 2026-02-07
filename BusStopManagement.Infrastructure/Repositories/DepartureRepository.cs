@@ -30,7 +30,8 @@ namespace BusStopManagement.Infrastructure.Repositories
 
         public async Task<List<Departure>> GetDepartures()
         {
-            return await _dbContext.Departures.Include(x => x.BusStop).ToListAsync();
+            //return await _dbContext.Departures.Include(x => x.BusStop).ToListAsync();
+            return await _dbContext.Departures.ToListAsync();
         }
 
         public async Task<Departure> UpdateDeparture(Departure departure)

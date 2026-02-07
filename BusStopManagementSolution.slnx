@@ -4,5 +4,7 @@
     <Project Path="BusStopManagement.Infrastructure/BusStopManagement.Infrastructure.csproj" Id="5f67a31d-472f-4078-afd9-ff1cd236b0a8" />
     <Project Path="BusStopManagement.UI/BusStopManagement.UI.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="BusStopManagement.RepositoryTests/BusStopManagement.RepositoryTests.csproj" Id="f40f9730-5db3-4d40-95f9-538c5fe762e8" />
+  </Folder>
 </Solution>
