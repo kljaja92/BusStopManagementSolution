@@ -28,7 +28,7 @@ namespace BusStopManagement.Infrastructure.Repositories
             return rowsDeleted > 0;
         }
 
-        public async Task<IEnumerable<BusStop>> GetBusStops()
+        public async Task<List<BusStop>> GetBusStops()
         {
             return await _dbContext.BusStops.ToListAsync();
         }

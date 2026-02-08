@@ -6,7 +6,7 @@ namespace BusStopManagement.Core.Domain.RepositoryContracts
     {
         Task<BusStop> AddBusStop(BusStop busStop);
 
-        Task<IEnumerable<BusStop>> GetBusStops();
+        Task<List<BusStop>> GetBusStops();
 
         Task<bool> DeleteBusStop(BusStop busStop);
 
