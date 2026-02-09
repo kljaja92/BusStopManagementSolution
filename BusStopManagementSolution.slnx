@@ -6,5 +6,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="BusStopManagement.RepositoryTests/BusStopManagement.RepositoryTests.csproj" Id="f40f9730-5db3-4d40-95f9-538c5fe762e8" />
+    <Project Path="BusStopManagement.ServiceTests/BusStopManagement.ServiceTests.csproj" Id="f8937ca6-316e-4209-85fd-1e0863ad6137" />
   </Folder>
 </Solution>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BusStopManagement.Core.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace BusStopManagement.Core.DTO
 {
@@ -21,6 +22,17 @@ namespace BusStopManagement.Core.DTO
         {
             if (DateAndTimeOfDeparture <= DateTime.UtcNow)
                 yield return new ValidationResult("Departure time must be in the future.", new[] { nameof(DateAndTimeOfDeparture) });
+        }
+
+        public Departure ToDeparture()
+        {
+            return new Departure()
+            {
+                Destination = Destination,
+                DateAndTimeOfDeparture = DateAndTimeOfDeparture,
+                NumberOfSeats = NumberOfSeats,
+                BusStopID = BusStopID
+            };
         }
     }
 }
