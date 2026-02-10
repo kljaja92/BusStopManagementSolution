@@ -6,6 +6,7 @@ using BusStopManagement.Core.Extensions;
 using BusStopManagement.Core.ServiceContracts;
 using BusStopManagement.Core.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace BusStopManagement.ServiceTests
@@ -13,6 +14,7 @@ namespace BusStopManagement.ServiceTests
     public class DepartureServiceTest
     {
         private readonly IDepartureAdderService _departureAdderService;
+        private readonly IDepartureDeleterService _departureDeleterService;
 
         private readonly IDepartureRepository _departureRepository;
 
@@ -29,6 +31,7 @@ namespace BusStopManagement.ServiceTests
             _testOutputHelper = testOutputHelper;
             _fixture = new Fixture();
             _departureAdderService = new DepartureAdderService(_departureRepository);
+            _departureDeleterService = new DepartureDeleterService(_departureRepository);
         }
 
         #region AddDeparture
@@ -70,7 +73,7 @@ namespace BusStopManagement.ServiceTests
         }
 
         [Fact]
-        public async Task AddDeparture_FullDepartureDetails_ToBeSuccessfull()
+        public async Task AddDeparture_FullDepartureDetails_ToBeSuccessful()
         {
             //Arrange
             DepartureAddRequest departureAddRequest = _fixture.Build<DepartureAddRequest>().Create();
@@ -88,6 +91,59 @@ namespace BusStopManagement.ServiceTests
             //Assert
             departureResponseFromAdd.DepartureID.Should().NotBe(Guid.Empty);
             departureResponseFromAdd.Should().Be(departureResponseExpected);
+        }
+
+        #endregion
+
+        #region DeleteDeparture
+
+        [Fact]
+        public async Task DeleteDeparture_NullDeparture_ToBeArgumentNullException()
+        {
+            //Arrange
+            Departure? departure = null!;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _departureDeleterService.DeleteDeparture(departure);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task DeleteDeparture_DepartureExists_ToBeSuccessful()
+        {
+            //Arrange
+            Departure departure = _fixture.Build<Departure>().Without(x => x.BusStop).Create();
+
+            _departureRepositoryMock.Setup(x => x.DeleteDeparture(It.IsAny<Departure>())).ReturnsAsync(true);
+
+            //Act
+            bool isDeleted = await _departureDeleterService.DeleteDeparture(departure);
+
+            //Assert
+            isDeleted.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task DeleteDeparture_DepartureNotPresentInDatabase_ToBeDbUpdateConcurrencyException()
+        {
+            //Arrange
+            Departure departure = _fixture.Build<Departure>().Without(x => x.BusStop).Create();
+
+            _departureRepositoryMock.Setup(x => x.DeleteDeparture(It.IsAny<Departure>())).ThrowsAsync(new DbUpdateConcurrencyException("Attempted to delete entity that doesn't exist in database"));
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _departureDeleterService.DeleteDeparture(departure);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<DbUpdateConcurrencyException>();
         }
 
         #endregion
