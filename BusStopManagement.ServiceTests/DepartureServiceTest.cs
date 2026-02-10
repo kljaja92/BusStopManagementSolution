@@ -15,6 +15,7 @@ namespace BusStopManagement.ServiceTests
     {
         private readonly IDepartureAdderService _departureAdderService;
         private readonly IDepartureDeleterService _departureDeleterService;
+        private readonly IDepartureGetterService _departureGetterService;
 
         private readonly IDepartureRepository _departureRepository;
 
@@ -28,10 +29,14 @@ namespace BusStopManagement.ServiceTests
         {
             _departureRepositoryMock = new Mock<IDepartureRepository>();
             _departureRepository = _departureRepositoryMock.Object;
+
             _testOutputHelper = testOutputHelper;
+
             _fixture = new Fixture();
+
             _departureAdderService = new DepartureAdderService(_departureRepository);
             _departureDeleterService = new DepartureDeleterService(_departureRepository);
+            _departureGetterService = new DepartureGetterService(_departureRepository);
         }
 
         #region AddDeparture
@@ -144,6 +149,54 @@ namespace BusStopManagement.ServiceTests
 
             //Assert
             await action.Should().ThrowAsync<DbUpdateConcurrencyException>();
+        }
+
+        #endregion
+
+        #region GetDepartures
+
+        [Fact]
+        public async Task GetDepartures_NoDeparturesInDatabase_ToBeEmptyList()
+        {
+            //Arrange
+            _departureRepositoryMock.Setup(x => x.GetDepartures()).ReturnsAsync(new List<Departure>());
+
+            //Act
+            List<DepartureResponse> departureResponsesFromGet = await _departureGetterService.GetDepartures();
+
+            //Assert
+            Assert.Empty(departureResponsesFromGet);
+            departureResponsesFromGet.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetDepartures_DeparturesExist_ToBeSuccessful()
+        {
+            //Arrange
+            List<Departure> departures = new List<Departure>()
+            {
+                _fixture.Build<Departure>().Without(x => x.BusStop).Create(),
+                _fixture.Build<Departure>().Without(x => x.BusStop).Create(),
+                _fixture.Build<Departure>().Without(x => x.BusStop).Create()
+            };
+
+            List<DepartureResponse> departureResponsesListFromExpected = departures.Select(x => x.ToDepartureResponse()).ToList();
+
+            _testOutputHelper.WriteLine("Expected: ");
+            foreach (DepartureResponse departureResponseFromExpected in departureResponsesListFromExpected)
+                _testOutputHelper.WriteLine(departureResponseFromExpected.ToString());
+
+            _departureRepositoryMock.Setup(x => x.GetDepartures()).ReturnsAsync(departures);
+
+            //Act
+            List<DepartureResponse> departureResponsesFromGet = await _departureGetterService.GetDepartures();
+
+            _testOutputHelper.WriteLine("Actual: ");
+            foreach (DepartureResponse departureResponseFromGet in departureResponsesFromGet)
+                _testOutputHelper.WriteLine(departureResponseFromGet.ToString());
+
+            //Assert
+            departureResponsesFromGet.Should().BeEquivalentTo(departureResponsesListFromExpected);
         }
 
         #endregion

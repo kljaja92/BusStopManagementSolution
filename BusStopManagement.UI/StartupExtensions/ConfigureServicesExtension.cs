@@ -1,4 +1,6 @@
 ﻿using BusStopManagement.Core.Domain.RepositoryContracts;
+using BusStopManagement.Core.ServiceContracts;
+using BusStopManagement.Core.Services;
 using BusStopManagement.Infrastructure.DatabaseContext;
 using BusStopManagement.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,9 @@ namespace BusStopManagement.UI.StartupExtensions
             });
             services.AddScoped<IDepartureRepository, DepartureRepository>();
             services.AddScoped<IBusStopRepository, BusStopRepository>();
+            services.AddScoped<IDepartureAdderService, DepartureAdderService>();
+            services.AddScoped<IDepartureDeleterService, DepartureDeleterService>();
+            services.AddScoped<IDepartureGetterService, DepartureGetterService>();
 
             return services;
         }
