@@ -28,6 +28,11 @@ namespace BusStopManagement.Infrastructure.Repositories
             return rowsDeleted > 0;
         }
 
+        public async Task<Departure?> GetDepartureByDepartureId(Guid departureId)
+        {
+            return await _dbContext.Departures.FirstOrDefaultAsync(x => x.DepartureID == departureId);
+        }
+
         public async Task<List<Departure>> GetDepartures()
         {
             //return await _dbContext.Departures.Include(x => x.BusStop).ToListAsync();

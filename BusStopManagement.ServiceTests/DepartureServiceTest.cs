@@ -16,6 +16,7 @@ namespace BusStopManagement.ServiceTests
         private readonly IDepartureAdderService _departureAdderService;
         private readonly IDepartureDeleterService _departureDeleterService;
         private readonly IDepartureGetterService _departureGetterService;
+        private readonly IDepartureUpdaterService _departureUpdaterService;
 
         private readonly IDepartureRepository _departureRepository;
 
@@ -37,6 +38,7 @@ namespace BusStopManagement.ServiceTests
             _departureAdderService = new DepartureAdderService(_departureRepository);
             _departureDeleterService = new DepartureDeleterService(_departureRepository);
             _departureGetterService = new DepartureGetterService(_departureRepository);
+            _departureUpdaterService = new DepartureUpdaterService(_departureRepository);
         }
 
         #region AddDeparture
@@ -197,6 +199,117 @@ namespace BusStopManagement.ServiceTests
 
             //Assert
             departureResponsesFromGet.Should().BeEquivalentTo(departureResponsesListFromExpected);
+        }
+
+        #endregion
+
+        #region GetDepartureByDepartureID
+
+        [Fact]
+        public async Task GetDepartureByDepartureID_NullDepartureID_ToBeNull()
+        {
+            //Arrange
+            Guid? departureID = null;
+
+            //Act
+            DepartureResponse? departureResponseFromGet = await _departureGetterService.GetDepartureByDepartureID(departureID);
+
+            //Assert
+            departureResponseFromGet.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDepartureByDepartureID_WithDepartureID_ToBeSuccessful()
+        {
+            //Arrange
+            Departure departure = _fixture.Build<Departure>().Without(x => x.BusStop).Create();
+            
+            DepartureResponse departureResponseExpected = departure.ToDepartureResponse();
+
+            _departureRepositoryMock.Setup(x => x.GetDepartureByDepartureId(It.IsAny<Guid>())).ReturnsAsync(departure);
+
+            //Act
+            DepartureResponse? departureResponseFromGet = await _departureGetterService.GetDepartureByDepartureID(departure.DepartureID);
+
+            //Assert
+            departureResponseFromGet.Should().Be(departureResponseExpected);
+        }
+
+        #endregion
+
+        #region UpdateDeparture
+
+        [Fact]
+        public async Task UpdateDeparture_NullDeparture_ToBeArgumentNullException()
+        {
+            //Arrange
+            DepartureUpdateRequest? departureUpdateRequest = null;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _departureUpdaterService.UpdateDeparture(departureUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task UpdateDeparture_InvalidDepartureID_ToBeArgumentException()
+        {
+            //Arrange
+            DepartureUpdateRequest departureUpdateRequest = _fixture.Build<DepartureUpdateRequest>().Create();
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _departureUpdaterService.UpdateDeparture(departureUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task UpdateDeparture_DestinationIsNull_ToBeArgumentNullException()
+        {
+            //Arrange
+            Departure departure = _fixture.Build<Departure>().Without(x => x.Destination).Without(x => x.BusStop).Create();
+
+            DepartureResponse departureResponseFromAdd = departure.ToDepartureResponse();
+
+            DepartureUpdateRequest departureUpdateRequest = departureResponseFromAdd.ToDepartureUpdateRequest();
+            departureUpdateRequest.Destination = null!;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _departureUpdaterService.UpdateDeparture(departureUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task UpdateDeparture_FullDeparture_ToBeSuccessful()
+        {
+            //Arrange
+            Departure departure = _fixture.Build<Departure>().Without(x => x.BusStop).Create();
+
+            DepartureResponse departureResponseExpected = departure.ToDepartureResponse();
+
+            DepartureUpdateRequest departureUpdateRequest = departureResponseExpected.ToDepartureUpdateRequest();
+
+            _departureRepositoryMock.Setup(x => x.GetDepartureByDepartureId(It.IsAny<Guid>())).ReturnsAsync(departure);
+            _departureRepositoryMock.Setup(x => x.UpdateDeparture(It.IsAny<Departure>())).ReturnsAsync(departure);
+
+            //Act
+            DepartureResponse departureResponseFromUpdate = await _departureUpdaterService.UpdateDeparture(departureUpdateRequest);
+
+            //Assert
+            departureResponseFromUpdate.Should().Be(departureResponseExpected);
         }
 
         #endregion

@@ -15,6 +15,21 @@ namespace BusStopManagement.Core.Services
             _departureRepository = departureRepository;
         }
 
+        public async Task<DepartureResponse?> GetDepartureByDepartureID(Guid? departureID)
+        {
+            if (departureID == null)
+                return null;
+            else
+            {
+                Departure? departure = await _departureRepository.GetDepartureByDepartureId(departureID.Value);
+
+                if (departure == null)
+                    return null;
+                else
+                    return departure.ToDepartureResponse();
+            }
+        }
+
         public async Task<List<DepartureResponse>> GetDepartures()
         {
             List<Departure> departures = await _departureRepository.GetDepartures();

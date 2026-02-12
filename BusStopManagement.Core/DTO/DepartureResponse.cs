@@ -25,5 +25,17 @@
 
         public override string ToString() =>
             $"DepartureID: {DepartureID}, Destination: {Destination}, Date: {DateAndTimeOfDeparture}, Seats: {NumberOfSeats}, BusStopID: {BusStopID}";
+
+        public DepartureUpdateRequest ToDepartureUpdateRequest()
+        {
+            return new DepartureUpdateRequest()
+            {
+                DepartureID = DepartureID,
+                Destination = Destination,
+                DateAndTimeOfDeparture = DateAndTimeOfDeparture,
+                NumberOfSeats = NumberOfSeats,
+                BusStopID = BusStopID
+            };
+        }
     }
 }

@@ -12,15 +12,18 @@ namespace BusStopManagement.UI.StartupExtensions
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllersWithViews();
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
+
             services.AddScoped<IDepartureRepository, DepartureRepository>();
             services.AddScoped<IBusStopRepository, BusStopRepository>();
             services.AddScoped<IDepartureAdderService, DepartureAdderService>();
             services.AddScoped<IDepartureDeleterService, DepartureDeleterService>();
             services.AddScoped<IDepartureGetterService, DepartureGetterService>();
+            services.AddScoped<IDepartureUpdaterService, DepartureUpdaterService>();
 
             return services;
         }

@@ -11,5 +11,7 @@ namespace BusStopManagement.Core.Domain.RepositoryContracts
         Task<bool> DeleteDeparture(Departure departure);
 
         Task<Departure> UpdateDeparture(Departure departure);
+
+        Task<Departure?> GetDepartureByDepartureId(Guid departureId);
     }
 }

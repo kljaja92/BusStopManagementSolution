@@ -189,5 +189,42 @@ namespace BusStopManagement.RepositoryTests
         }
 
         #endregion
+
+        #region GetDepartureByDepartureId
+
+        [Fact]
+        public async Task GetDepartureByDepartureId_NullDepartureId_ToBeNull()
+        {
+            //Arrange
+            Guid departureId = Guid.NewGuid();
+
+            //Act
+            Departure? departureFromDb = await _departureRepository.GetDepartureByDepartureId(departureId);
+
+            //Assert
+            departureFromDb.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDepartureByDepartureId_DepartureExists_ToBeSuccessful()
+        {
+            //Arrange
+            Guid testGuid = Guid.NewGuid();
+            _testOutputHelper.WriteLine($"Guid for testing: {testGuid}");
+
+            Departure departure = _fixture.Build<Departure>().With(x => x.DepartureID, testGuid).Without(x => x.BusStop).Create();
+
+            await _departureRepository.AddDeparture(departure);
+
+            //Act
+            Departure? departureFromDb = await _departureRepository.GetDepartureByDepartureId(testGuid);
+
+            //Assert
+            departureFromDb.Should().NotBeNull();
+            departureFromDb.DepartureID.Should().Be(testGuid);
+            _testOutputHelper.WriteLine($"Guid from database: {departureFromDb.DepartureID}");
+        }
+
+        #endregion
     }
 }
