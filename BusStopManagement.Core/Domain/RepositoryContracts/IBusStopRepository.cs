@@ -11,5 +11,9 @@ namespace BusStopManagement.Core.Domain.RepositoryContracts
         Task<bool> DeleteBusStop(BusStop busStop);
 
         Task<BusStop> UpdateBusStop(BusStop busStop);
+
+        Task<BusStop?> GetBusStopByBusStopId(Guid busStopId);
+
+        Task<BusStop?> GetBusStopByBusStopName(string busStopName);
     }
 }

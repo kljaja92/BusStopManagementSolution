@@ -1,13 +1,9 @@
 ﻿using AutoFixture;
 using BusStopManagement.Core.Domain.Entities;
-using BusStopManagement.Core.Domain.RepositoryContracts;
 using BusStopManagement.Infrastructure.DatabaseContext;
 using BusStopManagement.Infrastructure.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BusStopManagement.RepositoryTests
 {
@@ -189,6 +185,80 @@ namespace BusStopManagement.RepositoryTests
             result.BusStopName.Should().Be("Updated");
             result.BusStopAddress.Should().Be("AddressUpdated");
             busStops.Should().Contain(x => x.BusStopID == busStop.BusStopID && x.BusStopName == "Updated" && x.BusStopAddress == "AddressUpdated");
+        }
+
+        #endregion
+
+        #region GetBusStopByBusStopId
+
+        [Fact]
+        public async Task GetBusStopById_NullBusStop_ToBeNull()
+        {
+            //Arrange
+            Guid busStopId = Guid.NewGuid();
+
+            //Act
+            BusStop? busStop = await _busStopRepository.GetBusStopByBusStopId(busStopId);
+
+            //Assert
+            busStop.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetBusStopById_BusStopExists_ToBeSuccessful()
+        {
+            //Arrange
+            Guid testGuid = Guid.NewGuid();
+            _testOutputHelper.WriteLine($"Guid for testing: {testGuid}");
+
+            BusStop busStop = _fixture.Build<BusStop>().With(x => x.BusStopID, testGuid).Without(x => x.Departures).Create();
+
+            await _busStopRepository.AddBusStop(busStop);
+
+            //Act
+            BusStop? busStopFromDb = await _busStopRepository.GetBusStopByBusStopId(testGuid);
+
+            //Assert
+            busStopFromDb.Should().NotBeNull();
+            busStopFromDb.BusStopID.Should().Be(testGuid);
+            _testOutputHelper.WriteLine($"Guid from database: {busStopFromDb.BusStopID}");
+        }
+
+        #endregion
+
+        #region GetBusStopByBusStopName
+
+        [Fact]
+        public async Task GetBusStopByBusStopName_NullBusStopName_ToBeNull()
+        {
+            //Arrange
+            string busStopName = "Test";
+
+            //Act
+            BusStop? busStopFromDb = await _busStopRepository.GetBusStopByBusStopName(busStopName);
+
+            //Assert
+            busStopFromDb.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetBusStopByBusStopName_BusStopNameExists_ToBeSuccessful()
+        {
+            //Arrange
+            string busStopName = "Test";
+            _testOutputHelper.WriteLine($"Bus stop name for testing: {busStopName}");
+
+            BusStop busStop = _fixture.Build<BusStop>().With(x => x.BusStopName, busStopName).Without(x => x.Departures).Create();
+
+            await _busStopRepository.AddBusStop(busStop);
+
+            //Act
+            BusStop? busStopFromDb = await _busStopRepository.GetBusStopByBusStopName(busStopName);
+
+            //Assert
+            busStopFromDb.Should().NotBeNull();
+            busStopFromDb.BusStopName.Should().Be(busStopName);
+            _testOutputHelper.WriteLine($"Bus stop name from database: {busStopFromDb.BusStopName}");
         }
 
         #endregion

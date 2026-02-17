@@ -28,6 +28,7 @@ namespace BusStopManagement.Infrastructure.DatabaseContext
             modelBuilder.Entity<Departure>().Property(x => x.BusStopID).IsRequired();
 
             modelBuilder.Entity<BusStop>().HasKey(x => x.BusStopID);
+            modelBuilder.Entity<BusStop>().HasIndex(x => x.BusStopName).IsUnique();
             modelBuilder.Entity<BusStop>().Property(x => x.BusStopName).IsRequired().HasMaxLength(100);
             modelBuilder.Entity<BusStop>().Property(x => x.BusStopAddress).IsRequired().HasMaxLength(100);
             modelBuilder.Entity<BusStop>().HasMany(x => x.Departures).WithOne(x => x.BusStop).HasForeignKey(x => x.BusStopID).OnDelete(DeleteBehavior.Cascade);

@@ -28,6 +28,16 @@ namespace BusStopManagement.Infrastructure.Repositories
             return rowsDeleted > 0;
         }
 
+        public async Task<BusStop?> GetBusStopByBusStopId(Guid busStopId)
+        {
+            return await _dbContext.BusStops.FirstOrDefaultAsync(x => x.BusStopID == busStopId);
+        }
+
+        public async Task<BusStop?> GetBusStopByBusStopName(string busStopName)
+        {
+            return await _dbContext.BusStops.FirstOrDefaultAsync(x => x.BusStopName == busStopName);
+        }
+
         public async Task<List<BusStop>> GetBusStops()
         {
             return await _dbContext.BusStops.ToListAsync();
