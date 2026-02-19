@@ -1,26 +1,53 @@
-﻿using BusStopManagement.Core.DTO;
+﻿using BusStopManagement.Core.Domain.Entities;
+using BusStopManagement.Core.Domain.RepositoryContracts;
+using BusStopManagement.Core.DTO;
+using BusStopManagement.Core.Extensions;
 using BusStopManagement.Core.ServiceContracts;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BusStopManagement.Core.Services
 {
     public class BusStopGetterService : IBusStopGetterService
     {
-        public Task<BusStopResponse?> GetBusStopByBusStopID(Guid? busStopID)
+        private readonly IBusStopRepository _busStopRepository;
+
+        public BusStopGetterService(IBusStopRepository busStopRepository)
         {
-            throw new NotImplementedException();
+            _busStopRepository = busStopRepository;
         }
 
-        public Task<BusStopResponse?> GetBusStopByBusStopName(string busStopName)
+        public async Task<BusStopResponse?> GetBusStopByBusStopID(Guid? busStopID)
         {
-            throw new NotImplementedException();
+            if (busStopID == null)
+                return null;
+            else
+            {
+                BusStop? busStopFromList = await _busStopRepository.GetBusStopByBusStopId(busStopID.Value);
+
+                if (busStopFromList == null)
+                    return null;
+                else
+                    return busStopFromList.ToBusStopResponse();
+            }
         }
 
-        public Task<List<BusStopResponse>> GetBusStops()
+        public async Task<BusStopResponse?> GetBusStopByBusStopName(string busStopName)
         {
-            throw new NotImplementedException();
+            if (busStopName == null || string.IsNullOrWhiteSpace(busStopName))
+                return null;
+            else
+            {
+                BusStop? busStopFromList = await _busStopRepository.GetBusStopByBusStopName(busStopName);
+
+                if (busStopFromList == null)
+                    return null;
+                else
+                    return busStopFromList.ToBusStopResponse();
+            }
+        }
+
+        public async Task<List<BusStopResponse>> GetBusStops()
+        {
+            return (await _busStopRepository.GetBusStops()).Select(x => x.ToBusStopResponse()).ToList();
         }
     }
 }

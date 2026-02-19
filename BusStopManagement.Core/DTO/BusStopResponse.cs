@@ -1,6 +1,4 @@
-﻿using BusStopManagement.Core.Domain.Entities;
-
-namespace BusStopManagement.Core.DTO
+﻿namespace BusStopManagement.Core.DTO
 {
     public class BusStopResponse
     {
