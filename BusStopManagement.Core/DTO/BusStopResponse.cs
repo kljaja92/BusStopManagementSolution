@@ -21,5 +21,15 @@
 
         public override string ToString() =>
             $"Bus stop ID: {BusStopID}, Bus stop name: {BusStopName}, Bus stop address: {BusStopAddress}";
+
+        public BusStopUpdateRequest ToBusStopUpdateRequest()
+        {
+            return new BusStopUpdateRequest()
+            {
+                BusStopID = BusStopID,
+                BusStopName = BusStopName,
+                BusStopAddress = BusStopAddress
+            };
+        }
     }
 }

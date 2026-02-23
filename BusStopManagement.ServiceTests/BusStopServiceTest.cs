@@ -7,10 +7,8 @@ using BusStopManagement.Core.Extensions;
 using BusStopManagement.Core.ServiceContracts;
 using BusStopManagement.Core.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BusStopManagement.ServiceTests
 {
@@ -18,6 +16,8 @@ namespace BusStopManagement.ServiceTests
     {
         private readonly IBusStopAdderService _busStopAdderService;
         private readonly IBusStopGetterService _busStopGetterService;
+        private readonly IBusStopDeleterService _busStopDeleterService;
+        private readonly IBusStopUpdaterService _busStopUpdaterService;
 
         private readonly IBusStopRepository _busStopRepository;
 
@@ -38,6 +38,8 @@ namespace BusStopManagement.ServiceTests
 
             _busStopAdderService = new BusStopAdderService(_busStopRepository);
             _busStopGetterService = new BusStopGetterService(_busStopRepository);
+            _busStopDeleterService = new BusStopDeleterService(_busStopRepository);
+            _busStopUpdaterService = new BusStopUpdaterService(_busStopRepository);
         }
 
         #region AddBusStop
@@ -249,6 +251,136 @@ namespace BusStopManagement.ServiceTests
 
             //Assert
             busStopResponsesActual.Should().BeEquivalentTo(busStopResponsesList);
+        }
+
+        #endregion
+
+        #region DeleteBusStop
+
+        [Fact]
+        public async Task DeleteBusStop_NullBusStop_ToBeArgumentNullException()
+        {
+            //Arrange
+            BusStop? busStop = null!;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _busStopDeleterService.DeleteBusStop(busStop);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task DeleteBusStop_BusStopExists_ToBeSuccessful()
+        {
+            //Arrange
+            BusStop busStop = _fixture.Build<BusStop>().Without(x => x.Departures).Create();
+
+            _busStopRepositoryMock.Setup(x => x.DeleteBusStop(It.IsAny<BusStop>())).ReturnsAsync(true);
+
+            //Act
+            bool isDeleted = await _busStopDeleterService.DeleteBusStop(busStop);
+
+            //Assert
+            isDeleted.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task DeleteBusStop_BusStopNotPresentInDatabase_ToBeDbUpdateConcurrencyException()
+        {
+            //Arrange
+            BusStop busStop = _fixture.Build<BusStop>().Without(x => x.Departures).Create();
+
+            _busStopRepositoryMock.Setup(x => x.DeleteBusStop(It.IsAny<BusStop>())).ThrowsAsync(new DbUpdateConcurrencyException("Attempted to delete entity that doesn't exist in database"));
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _busStopDeleterService.DeleteBusStop(busStop);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<DbUpdateConcurrencyException>();
+        }
+
+        #endregion
+
+        #region UpdateBusStop
+
+        [Fact]
+        public async Task UpdateBusStop_NullBusStop_ToBeArgumentNullException()
+        {
+            //Arrange
+            BusStopUpdateRequest? busStopUpdateRequest = null;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _busStopUpdaterService.UpdateBusStop(busStopUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task UpdateBusStop_InvalidBusStopID_ToBeArgumentException()
+        {
+            //Arrange
+            BusStopUpdateRequest busStopUpdateRequest = _fixture.Build<BusStopUpdateRequest>().Create();
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _busStopUpdaterService.UpdateBusStop(busStopUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task UpdateBusStop_BusStopNameIsNull_ToBeArgumentException()
+        {
+            //Arrange
+            BusStop busStop = _fixture.Build<BusStop>().Without(x => x.Departures).Without(x => x.BusStopName).Create();
+
+            BusStopResponse busStopResponseFromAdd = busStop.ToBusStopResponse();
+
+            BusStopUpdateRequest busStopUpdateRequest = busStopResponseFromAdd.ToBusStopUpdateRequest();
+            busStopUpdateRequest.BusStopName = null!;
+
+            //Act
+            Func<Task> action = async () =>
+            {
+                await _busStopUpdaterService.UpdateBusStop(busStopUpdateRequest);
+            };
+
+            //Assert
+            await action.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task UpdateBusStop_FullBusStop_ToBeSuccessful()
+        {
+            //Arrange
+            BusStop busStop = _fixture.Build<BusStop>().Without(x => x.Departures).Create();
+
+            BusStopResponse busStopResponseExpected = busStop.ToBusStopResponse();
+
+            BusStopUpdateRequest busStopUpdateRequest = busStopResponseExpected.ToBusStopUpdateRequest();
+
+            _busStopRepositoryMock.Setup(x => x.GetBusStopByBusStopId(It.IsAny<Guid>())).ReturnsAsync(busStop);
+            _busStopRepositoryMock.Setup(x => x.UpdateBusStop(It.IsAny<BusStop>())).ReturnsAsync(busStop);
+
+            //Act
+            BusStopResponse busStopResponseFromUpdate = await _busStopUpdaterService.UpdateBusStop(busStopUpdateRequest);
+
+            //Assert
+            busStopResponseFromUpdate.Should().Be(busStopResponseExpected);
         }
 
         #endregion

@@ -272,7 +272,7 @@ namespace BusStopManagement.ServiceTests
         }
 
         [Fact]
-        public async Task UpdateDeparture_DestinationIsNull_ToBeArgumentNullException()
+        public async Task UpdateDeparture_DestinationIsNull_ToBeArgumentException()
         {
             //Arrange
             Departure departure = _fixture.Build<Departure>().Without(x => x.Destination).Without(x => x.BusStop).Create();
