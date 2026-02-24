@@ -27,6 +27,9 @@ namespace BusStopManagement.UI.StartupExtensions
             services.AddScoped<IDepartureUpdaterService, DepartureUpdaterService>();
 
             services.AddScoped<IBusStopAdderService, BusStopAdderService>();
+            services.AddScoped<IBusStopGetterService, BusStopGetterService>();
+            services.AddScoped<IBusStopDeleterService, BusStopDeleterService>();
+            services.AddScoped<IBusStopUpdaterService, BusStopUpdaterService>();
 
             return services;
         }
